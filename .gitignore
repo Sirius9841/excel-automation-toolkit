@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Project generated
+output/*
+!output/.gitkeep
+logs/*
+!logs/.gitkeep
+# Sample data: generated .xlsx files are committed for immediate usability
+# Run sample_data/generate_samples.py to regenerate them
+# sample_data/*.xlsx
+# sample_data/*.csv
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
