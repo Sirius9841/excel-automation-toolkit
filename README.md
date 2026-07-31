@@ -4,11 +4,11 @@ A Streamlit application for combining, cleaning, reviewing, and exporting spread
 
 ## Live demo
 
-[Open the live demo][(LIVE_DEMO_URL)](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
+[LIVE_DEMO](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
 
 The demo includes sample sales files, so you can test the complete workflow without preparing spreadsheets first.
 
-[View the source code](https://github.com/Sirius9841/excel-automation-toolkit)
+
 
 ## Project overview
 
