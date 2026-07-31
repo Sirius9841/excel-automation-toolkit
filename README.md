@@ -6,7 +6,7 @@ A Streamlit application for combining, cleaning, reviewing, and exporting spread
 
 [Open the live demo](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
 
-The demo includes sample sales files, so the full workflow can be tested without preparing spreadsheets first.
+The demo includes generated sample workbooks — `sales_north.xlsx` and `sales_south.xlsx` (complete records that exercise the built-in integrity check), plus `employees.xlsx` with a different schema — so the full workflow can be tested without preparing spreadsheets.
 
 ## Overview
 
@@ -14,52 +14,41 @@ Spreadsheets arrive from multiple offices, departments, or systems with differen
 
 ## Screenshots
 
-Screenshots will be added here once captured. Planned captures:
+Screenshots will be added here once captured. Planned captures: upload, schema review, cleaning approvals, insights, downloads, and the Word report.
 
-- `screenshots/upload.png` — upload files or load the demo
-- `screenshots/review.png` — schema comparison and column choice
-- `screenshots/cleaning.png` — duplicate and blank approvals
-- `screenshots/insights.png` — charts and source comparison
-- `screenshots/download.png` — cleaned data and Word report
-- `screenshots/report.png` — the data quality summary
+## Demo Workflow
 
-## Demo workflow
-
-1. Add two or more Excel or CSV files (the demo button loads two workbooks).
+1. Add two or more Excel or CSV files, or load the demo files.
 2. Compare the columns, then combine. Keeping every column is the default.
 3. Review duplicates and missing values. Actions are previews until applied.
 4. Download the cleaned data or generate the Word report.
 
-## Key capabilities
+## Key Capabilities
 
-- **Import and validation** — multiple `.xlsx`/`.csv` uploads (50 MB per file), unsupported files rejected; `order_id`-like fields stay text, every row is tagged with its `source_file`, and schemas are compared before combining.
+- **Import and validation** — multiple `.xlsx`/`.csv` uploads (50 MB per file) with clear rejection of unsupported files; `order_id`-like fields stay text, every row is tagged with its `source_file`, and schemas are compared before combining.
 - **Cleaning** — duplicate previews (identical rows by default, optionally on identity columns) and source-aware blank classification. Each affected column gets a conservative recommendation and a user-approved action: leave blank, recover from a validated relationship, or fill with median, mean, mode, or a custom value.
 - **Review** — type-aware statistics for identifiers, numbers, categories, and dates; unusual values are flagged, not errors. Integrity checks run after cleaning; optional insights add distributions, comparisons, and source-file views.
 - **Outputs** — formatted Excel workbook, UTF-8 CSV, audit CSV, and a customizable Word report (details below).
 
-## Why the cleaning logic is safer
+## Why the Cleaning Logic Is Safer
 
-A basic merge creates blanks wherever one file lacks a column another has; those blanks look identical to genuine ones but mean something different. This toolkit keeps each source schema: cells in a column a source never had are marked unavailable and never filled from another file.
+A basic merge creates blanks wherever one file lacks a column another has; those blanks look identical to genuine ones but mean something different. This toolkit keeps each source schema: cells in a column a source never contained are marked unavailable and never filled from another file.
 
 For genuine blanks, recommendations are conservative. When complete records validate a relationship such as `Total = Quantity × Unit Price`, a missing quantity is reconstructed from `Total ÷ Unit Price` — a calculation from known inputs, not an estimate. The formula, inputs, record, and source go into the audit.
 
 Cleaning actions apply only after the user approves them. Statistical replacements are identified as estimates and prefer same-source values; unusual values remain review flags, and every approved action has an audit record.
 
-## Example use case
+## Example Use Case
 
 Two regional offices send weekly sales spreadsheets — one includes `customer_city`, the other `discount_code` — and both contain missing or repeated records. The toolkit combines them and produces files ready for review or sharing.
 
-## Output files
+## Output Files
 
 - **Excel workbook** — four sheets: `Cleaned Data`, `Cleaning Summary`, `Values to Review`, and `Cleaning Audit` (each change, with original state, method, source, and timestamp).
 - **CSV** — the cleaned dataset in UTF-8 with a byte-order mark, so non-English text opens correctly.
 - **Word report** — executive summary, dataset overview, cleaning summary, column statistics, values worth reviewing, methodology, and limitations. Charts and a data preview are optional.
 
 The audit CSV is an example output of `scripts/generate_business_ready_samples.py`; in the app, the audit is inside the workbook and Word report.
-
-## Sample data
-
-The repository includes three generated workbooks — `sales_north.xlsx`, `sales_south.xlsx`, and `employees.xlsx` (a separate-schema sample). The demo loads the two sales workbooks, whose complete records support the built-in integrity check.
 
 ## Architecture
 
@@ -102,7 +91,7 @@ excel-automation-toolkit/
 
 Python, Streamlit, pandas, openpyxl, Matplotlib, python-docx, pytest. Runtime dependencies are in `requirements.txt`.
 
-## Running locally
+## Running Locally
 
 From PowerShell on Windows:
 
@@ -134,10 +123,9 @@ Uploaded files are parsed into memory; source workbooks are never overwritten, a
 
 The code does not send uploads to an external analytics service. In the hosted demo, files are processed by the hosted Streamlit instance and reach that server.
 
-## Current limitations
+## Current Limitations
 
-- Requires at least two files; no key-based joins
-- `.xlsx`/`.csv` only, first worksheet, 50 MB per file
+- `.xlsx`/`.csv` only (first worksheet, 50 MB per file); requires at least two files, no key-based joins
 - Column meaning is inferred, so domain fields may need review
 - Only the built-in `Total = Quantity × Unit Price` relationship is validated
 - Statistical fills are estimates; review flags are not errors
