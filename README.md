@@ -4,21 +4,19 @@ A Streamlit application for combining, cleaning, reviewing, and exporting spread
 
 ## Live demo
 
-[LIVE_DEMO](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
+[Open the live demo](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
 
 The demo includes sample sales files, so you can test the complete workflow without preparing spreadsheets first.
-
-
 
 ## Project overview
 
 Teams often receive spreadsheets from different offices, departments, or systems. The files may have different columns, repeated records, genuine blank values, and fields that one source never collected.
 
-Excel Automation Toolkit appends those files into one reviewable dataset, shows the schema differences, and guides the user through duplicate and missing-value decisions. It is useful for operations teams, analysts, small businesses, and developers who need a repeatable process without hiding how the data changed.
+Excel Automation Toolkit combines those files into one reviewable dataset, shows the schema differences, and guides the user through duplicate and missing-value decisions. It is useful for operations teams, analysts, small businesses, and developers who need a repeatable process without hiding how the data changed.
 
 ## Screenshots
 
-Final screenshots have not been committed yet. These are the planned captures and captions:
+Screenshots will be added here once captured. Planned captures and captions:
 
 - Upload files: add `.xlsx` or `.csv` files, or load the included demo files. Planned path: `screenshots/upload.png`
 - Review and combine: compare columns and choose whether to keep every field or only shared fields. Planned path: `screenshots/review.png`
@@ -56,7 +54,7 @@ Data Insights is optional. You can open it from the cleaning or download screen 
 - Offers conservative recommendations and user-approved actions for each affected column
 - Supports leaving values blank, arithmetic recovery, median, average, mode, custom-value replacement, and row removal where applicable
 - Uses same-source values first for statistical replacements and records any fallback
-- Records approved changes, retained blanks, removed rows, formulas, source files, and record identifiers in a cleaning audit
+- Records approved changes, retained blanks, removed rows, and formulas in a cleaning audit
 
 ### Data review
 
@@ -118,7 +116,9 @@ Charts and a short data preview are optional report sections. The report describ
 
 ## Example use case
 
-A company receives weekly sales spreadsheets from two regional offices. One file includes `customer_city`, the other includes `discount_code`, and both contain a few missing or repeated records. The application combines the files without deleting the unmatched columns, distinguishes unavailable fields from genuine blanks, records approved cleaning decisions, and produces files that can be reviewed or shared.
+A company receives weekly sales spreadsheets from two regional offices. One file includes `customer_city`, the other includes `discount_code`, and both contain a few missing or repeated records.
+
+The application combines the files without deleting the unmatched columns, distinguishes unavailable fields from genuine blanks, records approved cleaning decisions, and produces files that can be reviewed or shared.
 
 ## Sample data
 
@@ -145,8 +145,10 @@ excel-automation-toolkit/
 |   |-- file_handler.py
 |   |-- insights.py
 |   |-- integrity.py
+|   |-- logger_setup.py
 |   |-- report_generator.py
 |   |-- ui_helpers.py
+|   |-- utils.py
 |   |-- visualizer.py
 |   `-- workflow.py
 |-- sample_data/
@@ -167,6 +169,7 @@ excel-automation-toolkit/
 | `data_processor.py` | Schema comparison, row-wise combining, duplicate handling, and cleaning summaries |
 | `data_quality.py` | Source-aware blank classification, cleaning decisions, and audit records |
 | `integrity.py` | Relationship validation, deterministic recovery, and integrity findings |
+| `logger_setup.py` | Console and file logging setup shared by all modules |
 | `analyzer.py` | Column typing, summary statistics, and unusual-value detection |
 | `insights.py` | Optional column metrics, chart compatibility, time views, and source comparisons |
 | `visualizer.py` | Matplotlib chart creation |
@@ -174,6 +177,7 @@ excel-automation-toolkit/
 | `report_generator.py` | Word data quality report generation |
 | `workflow.py` | Screen navigation, session-state lifecycle, and export context |
 | `ui_helpers.py` | Small UI-facing helpers for duplicate and insight choices |
+| `utils.py` | Shared helpers such as file-extension checks and byte formatting |
 
 ## Technology
 
@@ -260,5 +264,5 @@ Building this project taught me to treat spreadsheet cleaning as a review workfl
 
 ## Contact
 
-- Upwork: UPWORK_PROFILE_URL
-- GitHub: [GITHUB_PROFILE_URL](https://github.com/Sirius9841)
+- Upwork: UPWORK_PROFILE_URL (add your profile link)
+- GitHub: [Sirius9841](https://github.com/Sirius9841)
