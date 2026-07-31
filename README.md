@@ -1,152 +1,103 @@
 # Excel Automation Toolkit
 
-A Streamlit application for combining, cleaning, reviewing, and exporting Excel and CSV data while keeping every approved change fully traceable.
+A guided tool for combining, cleaning, reviewing, and exporting Excel and CSV files while keeping every approved change traceable.
 
-## Live Demo
+[**Open the live demo**](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
 
-[Open the live demo](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
+The demo includes sample files, so the complete workflow can be tested immediately.
 
-The demo includes sample workbooks, so you can try the complete workflow without uploading your own files.
-
-
+<p align="center">
+  <a href="https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/">
+    <img
+      src="screenshots/Starting_Page.png"
+      alt="Excel Automation Toolkit"
+      width="760"
+    >
+  </a>
+</p>
 
 ## Overview
 
-Combining spreadsheets sounds simple until the files don't match.
+Combining spreadsheets becomes difficult when files use different columns, contain duplicate records, or represent missing data differently.
 
-Different departments often use different columns, duplicate records appear, and blank cells can mean either *missing data* or *this source never collected that field*. Treating those situations the same can lead to incorrect cleaning decisions.
+Excel Automation Toolkit combines those files into one reviewable dataset. It shows schema differences, previews cleaning actions, and lets the user approve each change before exporting the result with a complete audit trail.
 
-Excel Automation Toolkit guides the user through the entire process instead of making automatic assumptions. You review duplicates, missing values, and cleaning recommendations before any changes are applied, then export the results together with a complete audit trail.
+## Key Features
 
-
-
-## Screenshots
-
-<p align="center">
-  <strong>Starting page</strong>
-</p>
-
-<p align="center">
-  <img
-    src="screenshots/Starting_Page.png"
-    alt="Starting page"
-    width="580"
-  >
-</p>
-
-<br>
-
-<p align="center">
-  <strong>Review and combine</strong>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <strong>Review duplicates</strong>
-</p>
-
-<p align="center">
-  <img
-    src="screenshots/Combine_files.png"
-    alt="Review and combine"
-    width="275"
-  >
-  &nbsp;&nbsp;
-  <img
-    src="screenshots/Clean_data_dub.png"
-    alt="Review duplicates"
-    width="275"
-  >
-</p>
-
-<br>
-
-<p align="center">
-  <strong>Handle missing values</strong>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <strong>Data Insights</strong>
-</p>
-
-<p align="center">
-  <img
-    src="screenshots/Clean_empty_rows.png"
-    alt="Handle missing values"
-    width="275"
-  >
-  &nbsp;&nbsp;
-  <img
-    src="screenshots/Data_insights.png"
-    alt="Data Insights"
-    width="275"
-  >
-</p>
-
-<br>
-
-<p align="center">
-  <strong>Download results</strong>
-</p>
-
-<p align="center">
-  <img
-    src="screenshots/Download_results.png"
-    alt="Download results"
-    width="520"
-  >
-</p>
-
-
+- Compare spreadsheet schemas before combining files
+- Preserve the source of every imported row
+- Distinguish genuine missing values from fields a source never collected
+- Preview duplicate and missing-value actions before applying them
+- Recover values from validated relationships when possible
+- Review statistics, integrity checks, and unusual values
+- Export cleaned data, audit information, and a Word report
 
 ## Demo Workflow
 
 1. Upload two or more Excel or CSV files, or load the included demo data.
-2. Compare the detected schemas before combining the datasets.
+2. Compare the detected schemas and choose how to combine them.
 3. Review duplicate records and missing-value recommendations.
-4. Apply the changes you approve.
+4. Apply only the changes you approve.
 5. Export the cleaned dataset and supporting reports.
 
+<details>
+<summary><strong>View the complete workflow</strong></summary>
 
+<br>
 
-## Key Features
+### 1. Review and combine
 
-### Import
+<p align="center">
+  <img
+    src="screenshots/Combine_files.png"
+    alt="Review and combine uploaded files"
+    width="720"
+  >
+</p>
 
-- Supports multiple Excel and CSV files
-- Compares schemas before combining data
-- Preserves identifier columns as text
-- Records the original source file for every row
+### 2. Review duplicate records
 
-### Cleaning
+<p align="center">
+  <img
+    src="screenshots/Clean_data_dub.png"
+    alt="Review duplicate records"
+    width="720"
+  >
+</p>
 
-The application does not apply cleaning changes without the approval of the user.
+### 3. Handle missing values
 
-Instead, it presents every cleaning decision on review.
+<p align="center">
+  <img
+    src="screenshots/Clean_empty_rows.png"
+    alt="Choose missing-value cleaning methods"
+    width="720"
+  >
+</p>
 
-Some of the supported actions include:
+### 4. Explore Data Insights
 
-- duplicate removal
-- source-aware missing-value handling
-- deterministic value recovery from validated relationships
-- statistical replacements (mean, median, mode, or custom values)
+<p align="center">
+  <img
+    src="screenshots/Data_insights.png"
+    alt="Explore Data Insights"
+    width="720"
+  >
+</p>
 
-Every approved change is written to the audit.
+### 5. Download the results
 
-### Review
+<p align="center">
+  <img
+    src="screenshots/Download_results.png"
+    alt="Download cleaned data and generate a report"
+    width="720"
+  >
+</p>
 
-Before exporting, the application provides:
+</details>
 
-- statistics on the data
-- integrity checks
-- unusual-value detection
-- optional visualizations and source comparisons
-
-### Export
-
-Generate:
-
-- formatted Excel workbook
-- cleaned CSV
-- Word data quality report
-- cleaning audit included in the Excel workbook
-
-##  Why This Is Different from a Basic Spreadsheet Merge
+## Why This Is Different from a Basic Spreadsheet Merge
 
 A basic merge creates blanks wherever one file lacks a column another has. Those blanks look identical to genuine ones, but they mean something different. This toolkit keeps each source schema: a cell in a column a source never contained is marked as unavailable from that source, and is never filled from another file or dropped.
 
@@ -162,7 +113,7 @@ Two regional offices send weekly sales spreadsheets. One collects `customer_city
 
 - **Excel workbook** — four sheets: `Cleaned Data`, `Cleaning Summary`, `Values to Review`, and `Cleaning Audit` (each change, with original state, method, source, and timestamp).
 - **CSV** — the cleaned dataset in UTF-8 with a byte-order mark, so non-English text opens correctly.
-- **Word report** — executive summary, dataset overview, cleaning summary, column statistics, values worth reviewing, methodology, and limitations. Charts and a data preview are optional/selectable.
+- **Word report** — executive summary, dataset overview, cleaning summary, column statistics, values worth reviewing, methodology, and limitations. Charts and a data preview can be included optionally.
 
 
 ## Architecture
@@ -210,7 +161,7 @@ Optional: regenerate the samples (`python sample_data\generate_samples.py`) or r
 
 ## Privacy
 
-Uploaded files are parsed into memory; source workbooks are never overwritten, and outputs are generated in memory. Logs record operational details such as filenames and sizes — never cell values.
+Uploaded files are parsed into memory; source workbooks are never overwritten, and outputs are generated in memory. Logs record operational details such as filenames and sizes, never cell values.
 
 The code does not send uploads to an external analytics service. In the hosted demo, files are processed by the hosted Streamlit instance and reach that server.
 
@@ -225,5 +176,5 @@ The code does not send uploads to an external analytics service. In the hosted d
 
 ## Contact
 
-- Upwork: UPWORK_PROFILE_URL (add your profile link)
-- Email: m.sigtermans98@gmail.com
+- Email: [m.sigtermans98@gmail.com](mailto:m.sigtermans98@gmail.com)
+- GitHub: [Sirius9841](https://github.com/Sirius9841)
