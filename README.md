@@ -1,36 +1,93 @@
 # Excel Automation Toolkit
 
-A Streamlit application for combining, cleaning, reviewing, and exporting spreadsheet data while keeping each approved change traceable.
+A Streamlit application for combining, cleaning, reviewing, and exporting Excel and CSV data while keeping every approved change fully traceable.
 
 ## Live Demo
 
 [Open the live demo](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
 
-The demo ships with sample workbooks — `sales_north.xlsx` and `sales_south.xlsx` (complete records, which is what the built-in integrity check needs) and `employees.xlsx` with a different schema. You don't need to prepare your own files.
+The demo includes sample workbooks, so you can try the complete workflow without uploading your own files.
+
+
 
 ## Overview
 
-Spreadsheets come in from different offices, departments, or systems, and they rarely match up: columns differ, rows repeat, and a blank cell can mean "missing" or "this source never collected it". Excel Automation Toolkit combines them into one dataset you can review, and walks you through the duplicate and missing-value decisions instead of merging blindly.
+Combining spreadsheets sounds simple until the files don't match.
+
+Different departments often use different columns, duplicate records appear, and blank cells can mean either *missing data* or *this source never collected that field*. Treating those situations the same can lead to incorrect cleaning decisions.
+
+Excel Automation Toolkit guides the user through the entire process instead of making automatic assumptions. You review duplicates, missing values, and cleaning recommendations before any changes are applied, then export the results together with a complete audit trail.
+
+
 
 ## Screenshots
 
-Screenshots will be added here once captured: upload, schema review, cleaning approvals, insights, downloads, and the Word report.
+Screenshots will be added once captured.
+
+Planned images:
+
+- Upload and demo files
+- Schema comparison
+- Cleaning workflow
+- Data Insights
+- Export screen
+- Generated Word report
+
+
 
 ## Demo Workflow
 
-1. Add two or more Excel or CSV files, or load the demo files.
-2. Compare the columns, then combine. Keeping every column is the default.
-3. Review duplicates and missing values. Actions are previews until applied.
-4. Download the cleaned data or generate the Word report.
+1. Upload two or more Excel or CSV files, or load the included demo data.
+2. Compare the detected schemas before combining the datasets.
+3. Review duplicate records and missing-value recommendations.
+4. Apply the changes you approve.
+5. Export the cleaned dataset and supporting reports.
 
-## Key Capabilities
 
-- **Import and validation** — multiple `.xlsx`/`.csv` uploads (50 MB per file) with clear rejection of unsupported files; `order_id`-like fields stay text, every row is tagged with its `source_file`, and schemas are compared before combining.
-- **Cleaning** — duplicate previews (identical rows by default, optionally on identity columns) and source-aware blank classification. Each affected column gets a conservative recommendation and a user-approved action: leave blank, recover from a validated relationship, or fill with median, mean, mode, or a custom value.
-- **Review** — type-aware statistics for identifiers, numbers, categories, and dates; unusual values are flagged, not errors. Integrity checks run after cleaning; optional insights add distributions, comparisons, and source-file views.
-- **Outputs** — formatted Excel workbook, UTF-8 CSV, audit CSV, and a customizable Word report (details below).
 
-## Why the Cleaning Logic Is Safer
+## Key Features
+
+### Import
+
+- Supports multiple Excel and CSV files
+- Compares schemas before combining data
+- Preserves identifier columns as text
+- Records the original source file for every row
+
+### Cleaning
+
+The application does not apply cleaning changes without the approval of the user.
+
+Instead, it presents every cleaning decision on review.
+
+Some of the supported actions include:
+
+- duplicate removal
+- source-aware missing-value handling
+- deterministic value recovery from validated relationships
+- statistical replacements (mean, median, mode, or custom values)
+
+Every approved change is written to the audit.
+
+### Review
+
+Before exporting, the application provides:
+
+- statistics on the data
+- integrity checks
+- unusual-value detection
+- optional visualizations and source comparisons
+
+### Export
+
+Generate:
+
+- formatted Excel workbook
+- cleaned CSV
+- Word data quality report
+- cleaning audit included in the Excel workbook
+
+##  Why This Is Different from a Basic Spreadsheet Merge
 
 A basic merge creates blanks wherever one file lacks a column another has. Those blanks look identical to genuine ones, but they mean something different. This toolkit keeps each source schema: a cell in a column a source never contained is marked as unavailable from that source, and is never filled from another file or dropped.
 
@@ -46,37 +103,12 @@ Two regional offices send weekly sales spreadsheets. One collects `customer_city
 
 - **Excel workbook** — four sheets: `Cleaned Data`, `Cleaning Summary`, `Values to Review`, and `Cleaning Audit` (each change, with original state, method, source, and timestamp).
 - **CSV** — the cleaned dataset in UTF-8 with a byte-order mark, so non-English text opens correctly.
-- **Word report** — executive summary, dataset overview, cleaning summary, column statistics, values worth reviewing, methodology, and limitations. Charts and a data preview are optional.
+- **Word report** — executive summary, dataset overview, cleaning summary, column statistics, values worth reviewing, methodology, and limitations. Charts and a data preview are optional/selectable.
 
-The audit CSV is an example output of `scripts/generate_business_ready_samples.py`; in the app, the audit is inside the workbook and Word report.
 
 ## Architecture
 
-```text
-excel-automation-toolkit/
-|-- app.py
-|-- config/
-|   `-- settings.py
-|-- src/
-|   |-- analyzer.py
-|   |-- data_processor.py
-|   |-- data_quality.py
-|   |-- exporter.py
-|   |-- file_handler.py
-|   |-- insights.py
-|   |-- integrity.py
-|   |-- logger_setup.py
-|   |-- report_generator.py
-|   |-- ui_helpers.py
-|   |-- utils.py
-|   |-- visualizer.py
-|   `-- workflow.py
-|-- sample_data/
-|-- scripts/
-|-- tests/
-|-- requirements.txt
-`-- README.md
-```
+
 
 | Module | Responsibility |
 | --- | --- |
@@ -125,7 +157,8 @@ The code does not send uploads to an external analytics service. In the hosted d
 
 ## Current Limitations
 
-- `.xlsx`/`.csv` only (first worksheet, 50 MB per file); requires at least two files, no key-based joins
+- Supports `.xlsx` and `.csv` files up to 50 MB and reads the first Excel worksheet
+- The workflow requires at least two files and combines rows rather than performing key-based joins
 - Column meaning is inferred, so domain fields may need review
 - Only the built-in `Total = Quantity × Unit Price` relationship is validated
 - Statistical fills are estimates; review flags are not errors
