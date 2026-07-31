@@ -24,19 +24,38 @@ Excel Automation Toolkit guides the user through the entire process instead of m
 
 ### Starting page
 
-![Starting page](screenshots/Starting_Page.png)
+<p align="center">
+  <img src="screenshots/Starting_Page.png" alt="Starting page" width="760">
+</p>
 
-| Review and combine | Review duplicates |
-| --- | --- |
-| ![Review and combine](screenshots/Combine_files.png) | ![Review duplicates](screenshots/Clean_data_dub.png) |
-
-| Handle missing values | Data Insights |
-| --- | --- |
-| ![Handle missing values](screenshots/Clean_empty_rows.png) | ![Data Insights](screenshots/Data_insights.png) |
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <strong>Review and combine</strong><br>
+      <img src="screenshots/Combine_files.png" alt="Review and combine" width="360">
+    </td>
+    <td align="center" width="50%">
+      <strong>Review duplicates</strong><br>
+      <img src="screenshots/Clean_data_dub.png" alt="Review duplicates" width="360">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <strong>Handle missing values</strong><br>
+      <img src="screenshots/Clean_empty_rows.png" alt="Handle missing values" width="360">
+    </td>
+    <td align="center" width="50%">
+      <strong>Data Insights</strong><br>
+      <img src="screenshots/Data_insights.png" alt="Data Insights" width="360">
+    </td>
+  </tr>
+</table>
 
 ### Download results
 
-![Download results](screenshots/Download_results.png)
+<p align="center">
+  <img src="screenshots/Download_results.png" alt="Download results" width="680">
+</p>
 
 
 
@@ -172,4 +191,4 @@ The code does not send uploads to an external analytics service. In the hosted d
 ## Contact
 
 - Upwork: UPWORK_PROFILE_URL (add your profile link)
-- GitHub: [Sirius9841](https://github.com/Sirius9841)
+- Email: m.sigtermans98@gmail.com
