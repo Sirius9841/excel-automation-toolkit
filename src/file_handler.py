@@ -19,6 +19,16 @@ class FileSizeError(Exception):
     """Raised when a file exceeds the maximum allowed size."""
 
 
+def _identifier_dtype_map(columns: list[object]) -> dict[object, str]:
+    """Return pandas dtype overrides for business identifier columns."""
+    return {
+        column: "string"
+        for column in columns
+        if str(column).strip().lower() == "id"
+        or str(column).strip().lower().endswith("_id")
+    }
+
+
 def read_uploaded_file(uploaded_file: UploadedFile) -> pd.DataFrame:
     """Read a single uploaded file into a DataFrame.
 
@@ -67,12 +77,28 @@ def _check_file_size(uploaded_file: UploadedFile) -> None:
 def _read_csv(uploaded_file: UploadedFile) -> pd.DataFrame:
     """Try to read a CSV with UTF-8, fall back to latin-1."""
     try:
-        return pd.read_csv(uploaded_file, encoding="utf-8")
+        header = pd.read_csv(uploaded_file, encoding="utf-8", nrows=0)
+        uploaded_file.seek(0)
+        return pd.read_csv(
+            uploaded_file,
+            encoding="utf-8",
+            dtype=_identifier_dtype_map(list(header.columns)),
+        )
     except UnicodeDecodeError:
         uploaded_file.seek(0)
         logger.warning("UTF-8 decode failed for %s, trying latin-1",
                        uploaded_file.name)
-        df = pd.read_csv(uploaded_file, encoding=FALLBACK_ENCODING)
+        header = pd.read_csv(
+            uploaded_file,
+            encoding=FALLBACK_ENCODING,
+            nrows=0,
+        )
+        uploaded_file.seek(0)
+        df = pd.read_csv(
+            uploaded_file,
+            encoding=FALLBACK_ENCODING,
+            dtype=_identifier_dtype_map(list(header.columns)),
+        )
         return df
 
 
@@ -81,10 +107,15 @@ def _read_excel(uploaded_file: UploadedFile) -> pd.DataFrame:
 
     In a later milestone we'll let the user pick a specific sheet.
     """
-    excel_data = pd.read_excel(uploaded_file, sheet_name=None, engine="openpyxl")
-    sheet_name = list(excel_data.keys())[0]
+    excel_file = pd.ExcelFile(uploaded_file, engine="openpyxl")
+    sheet_name = excel_file.sheet_names[0]
+    header = pd.read_excel(excel_file, sheet_name=sheet_name, nrows=0)
     logger.info("Using sheet '%s' from %s", sheet_name, uploaded_file.name)
-    return excel_data[sheet_name]
+    return pd.read_excel(
+        excel_file,
+        sheet_name=sheet_name,
+        dtype=_identifier_dtype_map(list(header.columns)),
+    )
 
 
 def describe_dataframe(df: pd.DataFrame, name: str) -> dict:

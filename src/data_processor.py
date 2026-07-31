@@ -1,7 +1,29 @@
 """Merge, clean, and transform DataFrames."""
 
+from datetime import datetime, timezone
+from typing import Any, Iterable, Mapping, Sequence
+
 import pandas as pd
 
+from src.data_quality import (
+    CleaningAuditEntry,
+    SourceSchemas,
+    apply_missing_value_strategies,
+    audit_records,
+    audit_summary,
+    build_source_schemas,
+    classify_missing_values,
+    missing_decision_summary,
+    recommend_row_level_strategy,
+    row_identifier,
+    source_row_identifier,
+)
+from src.integrity import (
+    IntegrityReport,
+    RelationshipRule,
+    integrity_issues_frame,
+    validate_integrity,
+)
 from src.logger_setup import setup_logger
 
 logger = setup_logger(__name__)
@@ -131,6 +153,7 @@ def merge_datasets(
         raise MergeError("No DataFrames to merge.")
 
     file_names = [name for name, _ in dfs]
+    source_schemas = build_source_schemas(dfs)
 
     # Tag each row with its origin
     tagged_dfs = add_source_column(dfs)
@@ -158,6 +181,14 @@ def merge_datasets(
             len(dfs), len(merged), len(merged.columns),
         )
 
+    merged.attrs["source_schemas"] = source_schemas
+    source_row_numbers: dict[object, int] = {}
+    merged_index = 0
+    for tagged in tagged_dfs:
+        for source_position, _ in enumerate(tagged.index, start=2):
+            source_row_numbers[merged_index] = source_position
+            merged_index += 1
+    merged.attrs["source_row_numbers"] = source_row_numbers
     return merged, schema_warnings
 
 
@@ -224,21 +255,63 @@ def remove_duplicates(
         Tuple of (cleaned DataFrame, report dict).
     """
     before = len(df)
-    cleaned = df.drop_duplicates(subset=subset, keep=keep)
+    duplicate_mask = df.duplicated(subset=subset, keep=keep)
+    cleaned = df.loc[~duplicate_mask].copy()
     removed = before - len(cleaned)
+    recorded_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    audit = []
+    for index in df.index[duplicate_mask]:
+        source = (
+            str(df.at[index, "source_file"])
+            if "source_file" in df.columns
+            else "—"
+        )
+        audit.append(CleaningAuditEntry(
+            action_type="remove_duplicate",
+            action="Removed repeated record",
+            column=", ".join(str(column) for column in subset)
+            if subset
+            else "Complete row",
+            source_file=source,
+            row_identifier=row_identifier(df, index),
+            row_index=str(index),
+            original_state="Repeated record",
+            resulting_value=None,
+            strategy="Kept the first matching record",
+            strategy_scope=(
+                "Selected identity columns" if subset else "Complete row"
+            ),
+            missing_type="Not applicable",
+            rows_removed=1,
+            reason="User approved duplicate removal",
+            recorded_at=recorded_at,
+            original_source_row=source_row_identifier(df, index),
+            business_record_identifier=row_identifier(df, index),
+            original_value="Repeated record",
+            formula_or_strategy="Kept the first matching record",
+            calculation_scope=(
+                "Selected identity columns" if subset else "Complete row"
+            ),
+            timestamp=recorded_at,
+        ).as_record())
 
     report = {
         "before": before,
         "after": len(cleaned),
         "removed": removed,
         "subset": subset,
+        "audit": audit,
+        "integrity_report": validate_integrity(cleaned),
     }
 
     logger.info("Removed %d duplicate rows (%d -> %d)", removed, before, len(cleaned))
     return cleaned, report
 
 
-def detect_missing_values(df: pd.DataFrame) -> pd.DataFrame:
+def detect_missing_values(
+    df: pd.DataFrame,
+    source_schemas: Mapping[str, Iterable[str]] | None = None,
+) -> pd.DataFrame:
     """Return a DataFrame summarizing missing values per column.
 
     Args:
@@ -247,23 +320,31 @@ def detect_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with columns: column, missing_count, missing_pct, dtype.
     """
-    records = []
-    for col in df.columns:
-        missing = int(df[col].isna().sum())
-        records.append({
-            "column": col,
-            "missing_count": missing,
-            "missing_pct": round(missing / len(df) * 100, 1),
-            "dtype": str(df[col].dtype),
-        })
-    result = pd.DataFrame(records)
-    result = result.sort_values("missing_count", ascending=False)
-    return result
+    return classify_missing_values(df, source_schemas)
+
+
+def recommend_missing_strategy(
+    df: pd.DataFrame,
+    column: str,
+    source_schemas: Mapping[str, Iterable[str]] | None = None,
+    *,
+    configured_relationships: Sequence[RelationshipRule] | None = None,
+) -> str:
+    """Recommend a conservative strategy for genuine row-level blanks only."""
+    return recommend_row_level_strategy(
+        df,
+        column,
+        source_schemas,
+        configured_relationships=configured_relationships,
+    )
 
 
 def handle_missing_values(
     df: pd.DataFrame,
     strategies: dict[str, str],
+    source_schemas: Mapping[str, Iterable[str]] | None = None,
+    *,
+    business_group_columns: Sequence[str] | None = None,
 ) -> tuple[pd.DataFrame, list[str]]:
     """Apply per-column missing-value strategies to a DataFrame.
 
@@ -286,64 +367,24 @@ def handle_missing_values(
     Returns:
         Tuple of (cleaned DataFrame, list of action descriptions).
     """
-    cleaned = df.copy()
-    actions: list[str] = []
-
-    # ── Phase 1: Fill strategies (non-destructive) ───────────
-    fill_strategies = {c: s for c, s in strategies.items() if s != "drop_rows"}
-    drop_columns = [c for c, s in strategies.items() if s == "drop_rows"]
-
-    for col, strategy in fill_strategies.items():
-        if col not in cleaned.columns:
-            continue
-
-        missing_before = int(cleaned[col].isna().sum())
-        if missing_before == 0:
-            continue
-
-        if strategy == "fill_mean":
-            val = cleaned[col].mean()
-            cleaned[col] = cleaned[col].fillna(val)
-
-        elif strategy == "fill_median":
-            val = cleaned[col].median()
-            cleaned[col] = cleaned[col].fillna(val)
-
-        elif strategy == "fill_mode":
-            mode_vals = cleaned[col].mode(dropna=True)
-            val = mode_vals.iloc[0] if not mode_vals.empty else None
-            cleaned[col] = cleaned[col].fillna(val)
-
-        elif strategy == "fill_zero":
-            cleaned[col] = cleaned[col].fillna(0)
-
-        elif strategy.startswith("fill_value:"):
-            custom_val = strategy.split(":", 1)[1]
-            cleaned[col] = cleaned[col].fillna(custom_val)
-
-        missing_after = int(cleaned[col].isna().sum())
-        filled = missing_before - missing_after
-        actions.append(f"Column '{col}': filled {filled} missing values ({strategy})")
-
-        logger.info(
-            "Missing values in '%s': %d -> %d (strategy: %s)",
-            col, missing_before, missing_after, strategy,
-        )
-
-    # ── Phase 2: Drop rows (destructive, applied last) ──────
-    if drop_columns:
-        before_drop = len(cleaned)
-        cleaned = cleaned.dropna(subset=drop_columns)
-        dropped = before_drop - len(cleaned)
-        actions.append(
-            f"Dropped {dropped} rows with missing values in: {drop_columns}"
-        )
-        logger.info(
-            "Dropped %d rows with missing values in %s",
-            dropped, drop_columns,
-        )
-
-    return cleaned, actions
+    result = apply_missing_value_strategies(
+        df,
+        strategies,
+        source_schemas,
+        business_group_columns=business_group_columns,
+    )
+    logger.info(
+        "Applied %d missing-value audit actions across %d selected columns",
+        len(result.audit),
+        len(strategies),
+    )
+    legacy_compatible_messages = [
+        message.replace("Removed ", "Dropped ", 1)
+        if message.startswith("Removed ")
+        else message
+        for message in result.messages
+    ]
+    return result.cleaned, legacy_compatible_messages
 
 
 def generate_cleaning_report(
@@ -351,6 +392,11 @@ def generate_cleaning_report(
     cleaned: pd.DataFrame,
     duplicate_report: dict | None = None,
     missing_actions: list[str] | None = None,
+    *,
+    source_schemas: Mapping[str, Iterable[str]] | None = None,
+    cleaning_audit: Iterable[CleaningAuditEntry | Mapping[str, Any]] | None = None,
+    integrity_report: IntegrityReport | None = None,
+    pending_review_override: int | None = None,
 ) -> dict:
     """Generate a full cleaning report.
 
@@ -364,6 +410,45 @@ def generate_cleaning_report(
         Dict with keys: rows_before, rows_after, columns, duplicates_removed,
         missing_actions, total_missing_before, total_missing_after.
     """
+    before_missing = classify_missing_values(original, source_schemas)
+    after_missing = classify_missing_values(cleaned, source_schemas)
+    audit = audit_records(cleaning_audit or [])
+    summary = audit_summary(audit)
+    integrity_report = integrity_report or validate_integrity(cleaned)
+    structural_before = int(before_missing["structural_count"].sum())
+    structural_after = int(after_missing["structural_count"].sum())
+    row_level_before = int(before_missing["row_level_count"].sum())
+    row_level_after = int(after_missing["row_level_count"].sum())
+    decisions = missing_decision_summary(
+        after_missing,
+        audit,
+        pending_review_override=pending_review_override,
+        integrity_failures=integrity_report.severe_count,
+    )
+    warnings = []
+    if structural_after:
+        warnings.append(
+            "Some blank cells are caused by source files that did not contain "
+            "the corresponding column. These cells were preserved as unavailable "
+            "rather than replaced with estimated business values."
+        )
+    if summary["estimated_values"]:
+        warnings.append(
+            "Estimated values are marked in the Cleaning Audit and should be "
+            "validated before operational use."
+        )
+    rows_removed = (
+        summary["incomplete_rows_removed"]
+        + summary["duplicate_rows_removed"]
+    )
+    if rows_removed:
+        warnings.append("Removed rows are listed in the Cleaning Audit.")
+    if integrity_report.severe_count:
+        warnings.append(
+            f"{integrity_report.severe_count:,} severe relationship "
+            "integrity issue(s) require acknowledgment before download."
+        )
+
     return {
         "rows_before": len(original),
         "rows_after": len(cleaned),
@@ -372,4 +457,26 @@ def generate_cleaning_report(
         "missing_actions": missing_actions or [],
         "total_missing_before": int(original.isna().sum().sum()),
         "total_missing_after": int(cleaned.isna().sum().sum()),
+        "structural_missing_before": structural_before,
+        "structural_missing_after": structural_after,
+        "row_level_missing_before": row_level_before,
+        "row_level_missing_after": row_level_after,
+        "missing_values_reviewed": decisions.reviewed,
+        "values_changed": decisions.changed,
+        "approved_unchanged": decisions.approved_unchanged,
+        "decisions_pending": decisions.pending_review,
+        "unavailable_from_source": decisions.unavailable_from_source,
+        "failed_or_unresolved": decisions.failed_or_unresolved,
+        "values_filled": summary["values_filled"],
+        "deterministic_recoveries": summary["deterministic_recoveries"],
+        "estimated_values": summary["estimated_values"],
+        "incomplete_rows_removed": summary["incomplete_rows_removed"],
+        "integrity_passed": integrity_report.passed,
+        "integrity_issue_count": len(integrity_report.issues),
+        "integrity_failures": integrity_report.severe_count,
+        "severe_integrity_issue_count": integrity_report.severe_count,
+        "integrity_issues": integrity_report.issue_records(),
+        "integrity_review": integrity_issues_frame(integrity_report),
+        "warnings": warnings,
+        "audit": audit,
     }

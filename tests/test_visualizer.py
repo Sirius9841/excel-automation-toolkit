@@ -9,6 +9,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 import matplotlib
 matplotlib.use("Agg")
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import pytest
 from matplotlib.figure import Figure
@@ -19,6 +20,13 @@ from src.visualizer import (
     plot_bar_chart,
     plot_line_chart,
 )
+
+
+@pytest.fixture(autouse=True)
+def close_figures_after_test():
+    """Keep chart tests isolated and avoid retaining pyplot figures."""
+    yield
+    plt.close("all")
 
 
 @pytest.fixture
@@ -118,6 +126,47 @@ class TestLineChart:
     def test_mean_aggregation(self, df_dates):
         fig = plot_line_chart(df_dates, "date", "sales", agg="mean")
         assert isinstance(fig, Figure)
+
+    def test_clear_title_for_total_quantity_by_month(self, df_dates):
+        renamed = df_dates.rename(columns={"sales": "quantity"})
+
+        fig = plot_line_chart(
+            renamed,
+            "date",
+            "quantity",
+            agg="sum",
+            group_by="Month",
+        )
+
+        assert fig.axes[0].get_title(loc="left") == "Total Quantity by Month"
+
+    def test_average_unit_price_title_and_week_grouping(self, df_dates):
+        renamed = df_dates.rename(columns={"sales": "unit_price"})
+
+        fig = plot_line_chart(
+            renamed,
+            "date",
+            "unit_price",
+            agg="mean",
+            group_by="Week",
+        )
+
+        assert fig.axes[0].get_title(loc="left") == (
+            "Average Unit Price by Week"
+        )
+
+    def test_sales_total_uses_client_facing_title(self, df_dates):
+        renamed = df_dates.rename(columns={"sales": "total"})
+
+        fig = plot_line_chart(
+            renamed,
+            "date",
+            "total",
+            agg="sum",
+            group_by="Month",
+        )
+
+        assert fig.axes[0].get_title(loc="left") == "Sales Total by Month"
 
     def test_string_date_conversion(self, df_dates):
         df_str = df_dates.copy()

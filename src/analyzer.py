@@ -1,7 +1,12 @@
 """Generate summary statistics and detect outliers."""
 
+from collections.abc import Iterable, Mapping
+import re
+from typing import Any
+
 import pandas as pd
 
+from src.data_quality import CleaningAuditEntry, missing_status_by_column
 from src.logger_setup import setup_logger
 
 logger = setup_logger(__name__)
@@ -59,10 +64,42 @@ def detect_column_type(series: pd.Series) -> str:
     return "categorical"
 
 
+def friendly_column_name(column: object) -> str:
+    """Convert an internal column name into a readable display label."""
+    text = re.sub(r"[_\-]+", " ", str(column)).strip()
+    words = []
+    for word in text.split():
+        words.append("ID" if word.lower() == "id" else word.capitalize())
+    return " ".join(words) or str(column)
+
+
+def detect_business_column_type(series: pd.Series) -> str:
+    """Classify a column for business reporting, including identifiers."""
+    basic_type = detect_column_type(series)
+    if basic_type in {"empty", "date"}:
+        return basic_type
+
+    name = str(series.name).strip().lower()
+    id_like_name = name == "id" or name.endswith("_id")
+    non_null = series.dropna()
+    near_unique = (
+        len(non_null) > 0
+        and non_null.nunique(dropna=True) / len(non_null) >= 0.9
+    )
+    if id_like_name and near_unique:
+        return "identifier"
+    return basic_type
+
+
 # ── Summary statistics ────────────────────────────────────
 
 
-def generate_summary_statistics(df: pd.DataFrame) -> pd.DataFrame:
+def generate_summary_statistics(
+    df: pd.DataFrame,
+    *,
+    source_schemas: Mapping[str, Iterable[str]] | None = None,
+    cleaning_audit: Iterable[CleaningAuditEntry | Mapping[str, Any]] = (),
+) -> pd.DataFrame:
     """Return a DataFrame of per-column summary statistics.
 
     Each row is one column from the input. Columns shown depend on the
@@ -78,10 +115,16 @@ def generate_summary_statistics(df: pd.DataFrame) -> pd.DataFrame:
     if len(df.columns) == 0:
         return pd.DataFrame()
 
+    statuses = missing_status_by_column(
+        df,
+        source_schemas,
+        cleaning_audit,
+    )
     records = []
     for col in df.columns:
         series = df[col]
         col_type = detect_column_type(series)
+        status = statuses.get(col)
 
         row: dict[str, object] = {
             "Column": col,
@@ -89,6 +132,11 @@ def generate_summary_statistics(df: pd.DataFrame) -> pd.DataFrame:
             "Non-Missing": int(series.notna().sum()),
             "Missing": int(series.isna().sum()),
             "Missing %": round(series.isna().mean() * 100, 1),
+            "Approved blank": status.approved_blank if status else 0,
+            "Unavailable from source": (
+                status.unavailable_from_source if status else 0
+            ),
+            "Decisions pending": status.decisions_pending if status else 0,
             "Unique": int(series.nunique(dropna=False)),
         }
 
@@ -189,6 +237,23 @@ def summarize_outliers(
         DataFrame with one row per outlier cell.
     """
     records = []
+    identifier_columns = [
+        column
+        for column in df.columns
+        if str(column).lower() == "id"
+        or str(column).lower().endswith("_id")
+    ]
+    descriptive_columns = [
+        column
+        for column in df.columns
+        if str(column).lower() in {
+            "product",
+            "name",
+            "description",
+            "category",
+            "customer",
+        }
+    ]
     for col in columns:
         if col not in df.columns:
             continue
@@ -199,14 +264,43 @@ def summarize_outliers(
             q1 = non_null.quantile(0.25)
             q3 = non_null.quantile(0.75)
             iqr = q3 - q1
+            lower = q1 - 1.5 * iqr
+            upper = q3 + 1.5 * iqr
             outlier_indices = mask[mask].index
             for idx in outlier_indices:
+                identifier = (
+                    df.at[idx, identifier_columns[0]]
+                    if identifier_columns
+                    else f"Row {idx}"
+                )
+                description = (
+                    df.at[idx, descriptive_columns[0]]
+                    if descriptive_columns
+                    else "—"
+                )
+                source_file = (
+                    df.at[idx, "source_file"]
+                    if "source_file" in df.columns
+                    else "—"
+                )
                 records.append({
                     "Column": col,
                     "Row": idx,
+                    "Record ID": identifier,
+                    "Source File": source_file,
+                    "Original Source Row": df.attrs.get(
+                        "source_row_numbers", {}
+                    ).get(idx, "—"),
+                    "Description": description,
                     "Value": series.loc[idx],
                     "Q1": round(q1, 2),
                     "Q3": round(q3, 2),
                     "IQR": round(iqr, 2),
+                    "Lower Review Boundary": round(lower, 2),
+                    "Upper Review Boundary": round(upper, 2),
+                    "Reason": (
+                        "Value falls outside the IQR review range; "
+                        "it is not automatically incorrect."
+                    ),
                 })
     return pd.DataFrame(records)

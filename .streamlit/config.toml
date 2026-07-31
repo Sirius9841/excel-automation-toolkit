@@ -1,0 +1,19 @@
+[server]
+maxUploadSize = 50
+
+[client]
+toolbarMode = "minimal"
+
+[theme]
+base = "light"
+primaryColor = "#2563EB"
+backgroundColor = "#EAF0F8"
+secondaryBackgroundColor = "#F4F7FC"
+textColor = "#0F172A"
+borderColor = "#C7D2E0"
+dataframeBorderColor = "#CBD8E8"
+dataframeHeaderBackgroundColor = "#EAF1FA"
+baseRadius = "12px"
+buttonRadius = "9px"
+showWidgetBorder = true
+font = "sans serif"

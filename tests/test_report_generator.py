@@ -88,11 +88,11 @@ class TestGenerateReport:
         doc = DocxDocument(BytesIO(result))
         heading_texts = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
         assert "1. Dataset Overview" in heading_texts
-        assert "2. Data Quality Overview" in heading_texts
-        assert "3. Summary Statistics" in heading_texts
-        assert "4. Outlier Summary" in heading_texts
-        assert "6. Data Preview" in heading_texts
-        assert "7. Methodology & Limitations" in heading_texts
+        assert "2. Data Quality and Cleaning Summary" in heading_texts
+        assert "3. Column Statistics" in heading_texts
+        assert "4. Values Worth Reviewing" in heading_texts
+        assert "5. Methodology and Limitations" in heading_texts
+        assert "Data Preview" not in " ".join(heading_texts)
 
     def test_with_cleaning_report(self, df_sample, stats_df, cleaning_report):
         result = generate_report(
@@ -102,9 +102,18 @@ class TestGenerateReport:
             cleaning_report=cleaning_report,
         )
         doc = DocxDocument(BytesIO(result))
-        full_text = " ".join(p.text for p in doc.paragraphs)
+        full_text = " ".join(
+            [p.text for p in doc.paragraphs]
+            + [
+                cell.text
+                for table in doc.tables
+                for row in table.rows
+                for cell in row.cells
+            ]
+        )
         assert "3" in full_text  # duplicates removed
-        assert "fill_median" in full_text
+        assert "fill_median" not in full_text
+        assert "filled with the median" in full_text.lower()
 
     def test_with_outliers(self, df_sample, stats_df, outlier_df):
         result = generate_report(
@@ -120,7 +129,7 @@ class TestGenerateReport:
             for row in table.rows:
                 for cell in row.cells:
                     table_text += cell.text + " "
-        assert "price" in table_text
+        assert "price" in table_text.lower()
         assert "999.0" in table_text
 
     def test_empty_outlier_df(self, df_sample, stats_df):
@@ -144,8 +153,8 @@ class TestGenerateReport:
         doc = DocxDocument(BytesIO(result))
         heading_texts = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
         assert "1. Dataset Overview" in heading_texts
-        assert "7. Methodology & Limitations" in heading_texts
-        assert "3. Summary Statistics" not in heading_texts
+        assert "2. Methodology and Limitations" in heading_texts
+        assert "Column Statistics" not in " ".join(heading_texts)
 
     def test_empty_dataframe(self, stats_df):
         result = generate_report(
