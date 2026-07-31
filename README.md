@@ -22,17 +22,21 @@ Excel Automation Toolkit guides the user through the entire process instead of m
 
 ## Screenshots
 
-| Starting page | Review and combine |
-| --- | --- |
-| ![Starting page](screenshots/Starting_Page.png) | ![Review and combine](screenshots/Combine_files.png) |
+### Starting page
 
-| Review duplicates | Handle missing values |
-| --- | --- |
-| ![Duplicate review](screenshots/Clean_data_dub.png) | ![Missing-value options](screenshots/Clean_empty_rows.png) |
+![Starting page](screenshots/Starting_Page.png)
 
-| Data Insights | Download results |
+| Review and combine | Review duplicates |
 | --- | --- |
-| ![Data Insights](screenshots/Data_insights.png) | ![Download results](screenshots/Download_results.png) |
+| ![Review and combine](screenshots/Combine_files.png) | ![Review duplicates](screenshots/Clean_data_dub.png) |
+
+| Handle missing values | Data Insights |
+| --- | --- |
+| ![Handle missing values](screenshots/Clean_empty_rows.png) | ![Data Insights](screenshots/Data_insights.png) |
+
+### Download results
+
+![Download results](screenshots/Download_results.png)
 
 
 
