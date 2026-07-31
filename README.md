@@ -6,15 +6,15 @@ A Streamlit application for combining, cleaning, reviewing, and exporting spread
 
 [Open the live demo](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
 
-The demo includes generated sample workbooks — `sales_north.xlsx` and `sales_south.xlsx` (complete records that exercise the built-in integrity check), plus `employees.xlsx` with a different schema — so the full workflow can be tested without preparing spreadsheets.
+The demo ships with sample workbooks — `sales_north.xlsx` and `sales_south.xlsx` (complete records, which is what the built-in integrity check needs) and `employees.xlsx` with a different schema. You don't need to prepare your own files.
 
 ## Overview
 
-Spreadsheets arrive from multiple offices, departments, or systems with different columns, repeated records, genuine blanks, and fields one source never collected. Excel Automation Toolkit combines them into one reviewable dataset and guides the user through duplicate and missing-value decisions.
+Spreadsheets come in from different offices, departments, or systems, and they rarely match up: columns differ, rows repeat, and a blank cell can mean "missing" or "this source never collected it". Excel Automation Toolkit combines them into one dataset you can review, and walks you through the duplicate and missing-value decisions instead of merging blindly.
 
 ## Screenshots
 
-Screenshots will be added here once captured. Planned captures: upload, schema review, cleaning approvals, insights, downloads, and the Word report.
+Screenshots will be added here once captured: upload, schema review, cleaning approvals, insights, downloads, and the Word report.
 
 ## Demo Workflow
 
@@ -32,7 +32,7 @@ Screenshots will be added here once captured. Planned captures: upload, schema r
 
 ## Why the Cleaning Logic Is Safer
 
-A basic merge creates blanks wherever one file lacks a column another has; those blanks look identical to genuine ones but mean something different. This toolkit keeps each source schema: cells in a column a source never contained are marked unavailable and never filled from another file.
+A basic merge creates blanks wherever one file lacks a column another has. Those blanks look identical to genuine ones, but they mean something different. This toolkit keeps each source schema: a cell in a column a source never contained is marked as unavailable from that source, and is never filled from another file or dropped.
 
 For genuine blanks, recommendations are conservative. When complete records validate a relationship such as `Total = Quantity × Unit Price`, a missing quantity is reconstructed from `Total ÷ Unit Price` — a calculation from known inputs, not an estimate. The formula, inputs, record, and source go into the audit.
 
@@ -40,7 +40,7 @@ Cleaning actions apply only after the user approves them. Statistical replacemen
 
 ## Example Use Case
 
-Two regional offices send weekly sales spreadsheets — one includes `customer_city`, the other `discount_code` — and both contain missing or repeated records. The toolkit combines them and produces files ready for review or sharing.
+Two regional offices send weekly sales spreadsheets. One collects `customer_city`, the other `discount_code`, and both contain missing or repeated records. The app combines them without dropping either column, and you end up with files that are safe to review or share.
 
 ## Output Files
 
