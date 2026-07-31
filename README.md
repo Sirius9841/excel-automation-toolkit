@@ -22,17 +22,17 @@ Excel Automation Toolkit guides the user through the entire process instead of m
 
 ## Screenshots
 
-| Upload files | Review and combine |
+| Starting page | Review and combine |
 | --- | --- |
-| ![Upload files](Starting_Page.png) | ![Review and combine](Combine_files.png) |
+| ![Starting page](screenshots/Starting_Page.png) | ![Review and combine](screenshots/Combine_files.png) |
 
 | Review duplicates | Handle missing values |
 | --- | --- |
-| ![Duplicate review](Clean_data_dub.png) | ![Missing-value options](Clean_empty_rows.png) |
+| ![Duplicate review](screenshots/Clean_data_dub.png) | ![Missing-value options](screenshots/Clean_empty_rows.png) |
 
-| Explore insights | Export results |
+| Data Insights | Download results |
 | --- | --- |
-| ![Data Insights](Data_insights.png) | ![Download results](Download_results.png) |
+| ![Data Insights](screenshots/Data_insights.png) | ![Download results](screenshots/Download_results.png) |
 
 
 
