@@ -22,39 +22,74 @@ Excel Automation Toolkit guides the user through the entire process instead of m
 
 ## Screenshots
 
-### Starting page
-
 <p align="center">
-  <img src="screenshots/Starting_Page.png" alt="Starting page" width="760">
+  <strong>Starting page</strong>
 </p>
 
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <strong>Review and combine</strong><br>
-      <img src="screenshots/Combine_files.png" alt="Review and combine" width="360">
-    </td>
-    <td align="center" width="50%">
-      <strong>Review duplicates</strong><br>
-      <img src="screenshots/Clean_data_dub.png" alt="Review duplicates" width="360">
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="50%">
-      <strong>Handle missing values</strong><br>
-      <img src="screenshots/Clean_empty_rows.png" alt="Handle missing values" width="360">
-    </td>
-    <td align="center" width="50%">
-      <strong>Data Insights</strong><br>
-      <img src="screenshots/Data_insights.png" alt="Data Insights" width="360">
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img
+    src="screenshots/Starting_Page.png"
+    alt="Starting page"
+    width="580"
+  >
+</p>
 
-### Download results
+<br>
 
 <p align="center">
-  <img src="screenshots/Download_results.png" alt="Download results" width="680">
+  <strong>Review and combine</strong>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>Review duplicates</strong>
+</p>
+
+<p align="center">
+  <img
+    src="screenshots/Combine_files.png"
+    alt="Review and combine"
+    width="275"
+  >
+  &nbsp;&nbsp;
+  <img
+    src="screenshots/Clean_data_dub.png"
+    alt="Review duplicates"
+    width="275"
+  >
+</p>
+
+<br>
+
+<p align="center">
+  <strong>Handle missing values</strong>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>Data Insights</strong>
+</p>
+
+<p align="center">
+  <img
+    src="screenshots/Clean_empty_rows.png"
+    alt="Handle missing values"
+    width="275"
+  >
+  &nbsp;&nbsp;
+  <img
+    src="screenshots/Data_insights.png"
+    alt="Data Insights"
+    width="275"
+  >
+</p>
+
+<br>
+
+<p align="center">
+  <strong>Download results</strong>
+</p>
+
+<p align="center">
+  <img
+    src="screenshots/Download_results.png"
+    alt="Download results"
+    width="520"
+  >
 </p>
 
 
