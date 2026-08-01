@@ -1,10 +1,12 @@
 # Excel Automation Toolkit
 
-A guided tool for combining, cleaning, reviewing, and exporting Excel and CSV files while keeping every approved change traceable.
+A Streamlit app for combining, cleaning, reviewing, and exporting Excel and CSV files.
+
+The goal is simple: make messy spreadsheet work easier without hiding what changed along the way.
 
 [**Open the live demo**](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
 
-The demo includes sample files, so the complete workflow can be tested immediately.
+The demo includes sample files, so you can try the full workflow without preparing your own data.
 
 <p align="center">
   <a href="https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/">
@@ -18,27 +20,31 @@ The demo includes sample files, so the complete workflow can be tested immediate
 
 ## Overview
 
-Combining spreadsheets becomes difficult when files use different columns, contain duplicate records, or represent missing data differently.
+Combining spreadsheets is easy when every file has the same structure. In practice, that is rarely the case.
 
-Excel Automation Toolkit combines those files into one reviewable dataset. It shows schema differences, previews cleaning actions, and lets the user approve each change before exporting the result with a complete audit trail.
+One file may contain columns that another does not. Records may be duplicated, values may be missing, and some blank cells may simply mean that a source never collected that field.
+
+Excel Automation Toolkit helps review those differences before anything is changed. It combines the files, shows where the schemas differ, previews cleaning actions, and records every approved change.
 
 ## Key Features
 
-- Compare spreadsheet schemas before combining files
-- Preserve the source of every imported row
-- Distinguish genuine missing values from fields a source never collected
-- Preview duplicate and missing-value actions before applying them
-- Recover values from validated relationships when possible
-- Review statistics, integrity checks, and unusual values
-- Export cleaned data, audit information, and a Word report
+- Upload and combine multiple Excel or CSV files
+- Compare file structures before merging the data
+- Keep track of which file each row came from
+- Separate real missing values from fields a source never contained
+- Review duplicate and missing-value actions before applying them
+- Recover values from known relationships when possible
+- Review statistics, unusual values, and integrity checks
+- Export cleaned data, a cleaning audit, and a Word report
 
-## Demo Workflow
+## How It Works
 
 1. Upload two or more Excel or CSV files, or load the included demo data.
-2. Compare the detected schemas and choose how to combine them.
-3. Review duplicate records and missing-value recommendations.
-4. Apply only the changes you approve.
-5. Export the cleaned dataset and supporting reports.
+2. Compare the columns found in each file.
+3. Choose whether to keep all columns or only the shared ones.
+4. Review duplicates and missing values.
+5. Apply only the cleaning actions you approve.
+6. Download the cleaned data and supporting reports.
 
 <details>
 <summary><strong>View the complete workflow</strong></summary>
@@ -97,41 +103,86 @@ Excel Automation Toolkit combines those files into one reviewable dataset. It sh
 
 </details>
 
-## Why This Is Different from a Basic Spreadsheet Merge
+## More Than a Basic Spreadsheet Merge
 
-A basic merge creates blanks wherever one file lacks a column another has. Those blanks look identical to genuine ones, but they mean something different. This toolkit keeps each source schema: a cell in a column a source never contained is marked as unavailable from that source, and is never filled from another file or dropped.
+A normal merge creates blank cells whenever one file contains a column that another file does not.
 
-For genuine blanks, recommendations are conservative. When complete records validate a relationship such as `Total = Quantity × Unit Price`, a missing quantity is reconstructed from `Total ÷ Unit Price` — a calculation from known inputs, not an estimate. The formula, inputs, record, and source go into the audit.
+The problem is that those cells look exactly like genuine missing values, even though they mean something different. A blank value may mean that information is missing, or it may mean that the original file never contained that column at all.
 
-Cleaning actions apply only after the user approves them. Statistical replacements are identified as estimates and prefer same-source values; unusual values remain review flags, and every approved action has an audit record.
+The toolkit keeps the structure of each source file, so those cases can be handled separately. Values are not copied across unrelated files, and rows are not removed simply because one source lacked a column.
+
+For genuine missing values, the app suggests conservative options. For example, when the data confirms a relationship such as:
+
+`Total = Quantity × Unit Price`
+
+a missing quantity can be calculated from:
+
+`Total ÷ Unit Price`
+
+That is a direct calculation from known values rather than a statistical guess. The formula, source file, record, and result are all added to the cleaning audit.
+
+No cleaning action is applied until the user approves it.
 
 ## Example Use Case
 
-Two regional offices send weekly sales spreadsheets. One collects `customer_city`, the other `discount_code`, and both contain missing or repeated records. The app combines them without dropping either column, and you end up with files that are safe to review or share.
+Imagine two regional offices sending weekly sales spreadsheets.
+
+One file contains `customer_city`, while the other contains `discount_code`. Both files also include a few duplicates and missing values.
+
+The toolkit combines the files without dropping either column, guides the user through the cleaning decisions, and produces a final dataset that can be reviewed or shared.
 
 ## Output Files
 
-- **Excel workbook** — four sheets: `Cleaned Data`, `Cleaning Summary`, `Values to Review`, and `Cleaning Audit` (each change, with original state, method, source, and timestamp).
-- **CSV** — the cleaned dataset in UTF-8 with a byte-order mark, so non-English text opens correctly.
-- **Word report** — executive summary, dataset overview, cleaning summary, column statistics, values worth reviewing, methodology, and limitations. Charts and a data preview can be included optionally.
+### Excel workbook
 
+The Excel export contains four sheets:
+
+- `Cleaned Data`
+- `Cleaning Summary`
+- `Values to Review`
+- `Cleaning Audit`
+
+The audit includes the original value or state, the action taken, the method used, the source file, and the timestamp.
+
+### CSV
+
+The cleaned dataset can also be exported as a UTF-8 CSV file. A byte-order mark is included so non-English characters open correctly in common spreadsheet programs.
+
+### Word report
+
+The Word report includes:
+
+- an executive summary
+- dataset information
+- a summary of the cleaning actions
+- column statistics
+- values that may need review
+- methodology and limitations
+
+Charts and a small data preview can be added optionally.
 
 ## Architecture
 
-
-
-| Module | Responsibility |
+| Module | What it handles |
 | --- | --- |
-| `app.py`, `workflow.py` | Streamlit UI, guided flow, session state |
-| `file_handler.py`, `data_processor.py` | Uploads, parsing, schema comparison, combining |
-| `data_quality.py`, `integrity.py` | Blank classification, audit records, relationship validation |
-| `analyzer.py`, `insights.py`, `visualizer.py` | Statistics, flags, insights, charts |
-| `exporter.py`, `report_generator.py` | Excel/CSV outputs and the Word report |
-| `ui_helpers.py`, `utils.py`, `logger_setup.py` | UI helpers, shared utilities, logging |
+| `app.py`, `workflow.py` | Streamlit interface, navigation, and session state |
+| `file_handler.py`, `data_processor.py` | File uploads, parsing, schema comparison, and combining |
+| `data_quality.py`, `integrity.py` | Missing-value handling, audit records, and relationship checks |
+| `analyzer.py`, `insights.py`, `visualizer.py` | Statistics, review flags, insights, and charts |
+| `exporter.py`, `report_generator.py` | Excel, CSV, audit, and Word report generation |
+| `ui_helpers.py`, `utils.py`, `logger_setup.py` | Shared helpers, formatting, and logging |
 
 ## Technology
 
-Python, Streamlit, pandas, openpyxl, Matplotlib, python-docx, pytest. Runtime dependencies are in `requirements.txt`.
+- Python
+- Streamlit
+- pandas
+- openpyxl
+- Matplotlib
+- python-docx
+- pytest
+
+Runtime dependencies are listed in `requirements.txt`.
 
 ## Running Locally
 
@@ -140,8 +191,10 @@ From PowerShell on Windows:
 ```powershell
 git clone https://github.com/Sirius9841/excel-automation-toolkit.git
 cd excel-automation-toolkit
+
 python -m venv .venv
 .venv\Scripts\activate
+
 python -m pip install -r requirements.txt
 streamlit run app.py
 ```
@@ -153,28 +206,59 @@ python -m pip install pytest
 python -m pytest tests/ -v
 ```
 
-Optional: regenerate the samples (`python sample_data\generate_samples.py`) or rebuild the example outputs in `output/` (`python scripts\generate_business_ready_samples.py`).
+Regenerate the sample files:
 
-## Testing
+```powershell
+python sample_data\generate_samples.py
+```
 
-181 tests, all passing — schema-aware merging, duplicate handling, missing-value decisions, source-aware replacements, deterministic recovery, integrity checks, exports, reports, and insights.
+Generate the example output files:
+
+```powershell
+python scripts\generate_business_ready_samples.py
+```
+
+The generated files are written to `output/`.
+
+## Testing 
+
+181 tests, all passing schema-aware merging, duplicate handling, missing-value decisions, source-aware replacements, deterministic recovery, integrity checks, exports, reports, and insights.
+
+They cover:
+
+- file and schema handling
+- duplicate detection
+- missing-value decisions
+- source-aware replacements
+- value recovery from known relationships
+- integrity checks
+- statistics and insights
+- Excel and CSV exports
+- Word reports
+- workflow state
 
 ## Privacy
 
-Uploaded files are parsed into memory; source workbooks are never overwritten, and outputs are generated in memory. Logs record operational details such as filenames and sizes, never cell values.
+Uploaded files are processed in memory. The original files are never changed or overwritten.
 
-The code does not send uploads to an external analytics service. In the hosted demo, files are processed by the hosted Streamlit instance and reach that server.
+The application logs basic operational information such as filenames, file sizes, row counts, and errors. Spreadsheet cell values are not written to the logs.
+
+The code does not intentionally send uploaded data to analytics or other external services. Files uploaded to the live demo are processed on the hosted Streamlit server.
 
 ## Current Limitations
 
-- Supports `.xlsx` and `.csv` files up to 50 MB and reads the first Excel worksheet
-- The workflow requires at least two files and combines rows rather than performing key-based joins
-- Column meaning is inferred, so domain fields may need review
-- Only the built-in `Total = Quantity × Unit Price` relationship is validated
-- Statistical fills are estimates; review flags are not errors
-- No database or cloud-storage connectors; the audit CSV is not exposed in the UI
+- Supports `.xlsx` and `.csv` files up to 50 MB
+- Reads only the first worksheet from Excel files
+- Requires at least two input files
+- Combines rows rather than performing key-based joins
+- Infers column meaning from names, data types, and value patterns
+- Only the built-in `Total = Quantity × Unit Price` relationship is validated automatically
+- Statistical replacements are estimates and should be reviewed
+- Unusual values are review flags, not confirmed errors
+- Database and cloud-storage imports are not currently supported
+- The separate audit CSV is not exposed directly in the Streamlit interface
 
 ## Contact
 
-- Email: [m.sigtermans98@gmail.com](mailto:m.sigtermans98@gmail.com)
+- Email: [m.sigtermans44@gmail.com](mailto:m.sigtermans44@gmail.com)
 - GitHub: [Sirius9841](https://github.com/Sirius9841)
