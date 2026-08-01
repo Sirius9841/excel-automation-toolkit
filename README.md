@@ -103,7 +103,6 @@ Excel Automation Toolkit helps review those differences before anything is chang
 
 </details>
 
-## More Than a Basic Spreadsheet Merge
 
 ## More Than a Basic Spreadsheet Merge
 
