@@ -245,7 +245,6 @@ One issue that had a big impact on the project was that not every blank cell mea
 
 I also spent a large part of the project improving the UI. I wanted the data-processing logic to feel like a clear step-by-step workflow that someone without much technical experience could still use easily.
 
-A lot of the work ended up going into the interface as well as the data logic. I wanted users to understand what the app found and what would happen before they approved any changes.
 
 ## Contact
 
