@@ -235,6 +235,18 @@ The code does not intentionally send uploaded data to analytics or other externa
 - Database and cloud-storage imports are not currently supported
 - The separate audit CSV is not exposed directly in the Streamlit interface
 
+## Why I Built It
+
+I originally started this project to learn more about data automation by building a tool that could combine, clean, and analyze spreadsheet files.
+
+As I worked on it, I realized that the difficult part was not only processing the data. The app also needed to explain what it found, give useful recommendations, make each decision easy to review, and guide the user through the workflow without making it feel overwhelming.
+
+One issue that had a big impact on the project was that not every blank cell means the same thing. A value may be missing, or the original file may never have contained that column at all. That led me to keep track of each file's original structure and avoid changing data without the user's approval.
+
+I also spent a large part of the project improving the UI. I wanted the data-processing logic to feel like a clear step-by-step workflow that someone without much technical experience could still use easily.
+
+A lot of the work ended up going into the interface as well as the data logic. I wanted users to understand what the app found and what would happen before they approved any changes.
+
 ## Contact
 
 - Email: [m.sigtermans44@gmail.com](mailto:m.sigtermans44@gmail.com)
