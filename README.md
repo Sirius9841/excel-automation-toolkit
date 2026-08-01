@@ -2,7 +2,7 @@
 
 A Streamlit app for combining, cleaning, reviewing and exporting Excel and CSV files.
 
-The goal of this project is simple: make messy spreadsheet work easier without hiding what changed along the way and additionally give the user a better overview of their data.
+I built this project to make messy spreadsheet work easier while still showing the user exactly what changed. It also gives a clearer overview of the combined data before anything is exported.
 
 [**Open the live demo**](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
 
@@ -22,7 +22,7 @@ The demo includes sample files, so you can try the full workflow without using y
 
 Combining spreadsheets is easy when every file has the same structure. In practice, that is rarely the case.
 
-One file may contain columns that another does not. Records may be duplicated, values may be missing and some blank cells could just simply mean that a source never collected that field.
+One file may have columns that another does not. There may be duplicate rows or missing values, and sometimes a blank cell simply means that the original source never collected that field.
 
 Excel Automation Toolkit helps review those differences before anything is changed. It combines the files, shows where the schemas differ, previews cleaning actions, and records every approved change.
 
@@ -105,13 +105,15 @@ Excel Automation Toolkit helps review those differences before anything is chang
 
 ## More Than a Basic Spreadsheet Merge
 
-A normal merge creates blank cells whenever one file contains a column that another file does not.
+## More Than a Basic Spreadsheet Merge
 
-The problem is that those cells look exactly like genuine missing values, even though they mean something different. A blank value may intail that information is missing, or it may mean that the original file never contained that column at all.
+A normal merge creates blank cells whenever one file has a column that another file does not.
 
-The toolkit keeps the structure of each source file, so those cases can be handled separate for one other. Values are not copied across unrelated files, and rows are not removed simply because one source lacked a column.
+That becomes a problem because those blanks look the same as genuinely missing values. In reality, they mean different things: either a value is missing from an existing column, or the original file never contained that column at all.
 
-For genuine missing values, the app suggests conservative options. For example, when the data confirms a relationship such as:
+The toolkit keeps track of each file's original structure, so it can handle those cases separately. It does not copy values between unrelated source files or remove rows just because one source was missing a particular column.
+
+For genuine missing values, the app suggests a few careful options and lets the user choose what should happen. For example, when the data confirms a relationship such as:
 
 `Total = Quantity × Unit Price`
 
@@ -133,33 +135,9 @@ The toolkit combines the files without dropping either column, guides the user t
 
 ## Output Files
 
-### Excel workbook
-
-The Excel export contains four sheets:
-
-- `Cleaned Data`
-- `Cleaning Summary`
-- `Values to Review`
-- `Cleaning Audit`
-
-The audit includes the original value or state, the action taken, the method used, the source file and the timestamp.
-
-### CSV
-
-The cleaned dataset can also be exported as a UTF-8 CSV file. A byte-order mark is included so non-English characters open correctly in common spreadsheet programs.
-
-### Word report
-
-The Word report includes:
-
-- an executive summary
-- dataset information
-- a summary of the cleaning actions
-- column statistics
-- values that may need review
-- methodology and limitations
-
-Charts and a small data preview can be added optionally.
+- **Excel workbook:** includes the cleaned data, a cleaning summary, values worth reviewing, and the full audit.
+- **CSV:** contains the cleaned dataset in a format that opens correctly with non-English characters.
+- **Word report:** summarizes the dataset, cleaning actions, statistics, review findings, and limitations.
 
 ## Architecture
 
@@ -220,9 +198,9 @@ python scripts\generate_business_ready_samples.py
 
 The generated files are written to `output/`.
 
-## Testing 
+## Testing
 
-181 tests, all passing schema-aware merging, duplicate handling, missing-value decisions, source-aware replacements, deterministic recovery, integrity checks, exports, reports, and insights.
+The project currently has 181 automated tests and all of them pass.
 
 They cover:
 
@@ -230,11 +208,10 @@ They cover:
 - duplicate detection
 - missing-value decisions
 - source-aware replacements
-- value recovery from known relationships
+- recovery from known relationships
 - integrity checks
 - statistics and insights
-- Excel and CSV exports
-- Word reports
+- Excel, CSV and Word exports
 - workflow state
 
 ## Privacy
