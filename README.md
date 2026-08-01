@@ -1,12 +1,12 @@
 # Excel Automation Toolkit
 
-A Streamlit app for combining, cleaning, reviewing, and exporting Excel and CSV files.
+A Streamlit app for combining, cleaning, reviewing and exporting Excel and CSV files.
 
-The goal is simple: make messy spreadsheet work easier without hiding what changed along the way.
+The goal of this project is simple: make messy spreadsheet work easier without hiding what changed along the way and additionally give the user a better overview of their data.
 
 [**Open the live demo**](https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/)
 
-The demo includes sample files, so you can try the full workflow without preparing your own data.
+The demo includes sample files, so you can try the full workflow without using your own data.
 
 <p align="center">
   <a href="https://excel-automation-toolkit-4grkxben6isuewsyosq7mn.streamlit.app/">
@@ -22,7 +22,7 @@ The demo includes sample files, so you can try the full workflow without prepari
 
 Combining spreadsheets is easy when every file has the same structure. In practice, that is rarely the case.
 
-One file may contain columns that another does not. Records may be duplicated, values may be missing, and some blank cells may simply mean that a source never collected that field.
+One file may contain columns that another does not. Records may be duplicated, values may be missing and some blank cells could just simply mean that a source never collected that field.
 
 Excel Automation Toolkit helps review those differences before anything is changed. It combines the files, shows where the schemas differ, previews cleaning actions, and records every approved change.
 
@@ -34,8 +34,8 @@ Excel Automation Toolkit helps review those differences before anything is chang
 - Separate real missing values from fields a source never contained
 - Review duplicate and missing-value actions before applying them
 - Recover values from known relationships when possible
-- Review statistics, unusual values, and integrity checks
-- Export cleaned data, a cleaning audit, and a Word report
+- Review statistics, unusual values and integrity checks
+- Export cleaned data, a cleaning audit and a Word report
 
 ## How It Works
 
@@ -107,9 +107,9 @@ Excel Automation Toolkit helps review those differences before anything is chang
 
 A normal merge creates blank cells whenever one file contains a column that another file does not.
 
-The problem is that those cells look exactly like genuine missing values, even though they mean something different. A blank value may mean that information is missing, or it may mean that the original file never contained that column at all.
+The problem is that those cells look exactly like genuine missing values, even though they mean something different. A blank value may intail that information is missing, or it may mean that the original file never contained that column at all.
 
-The toolkit keeps the structure of each source file, so those cases can be handled separately. Values are not copied across unrelated files, and rows are not removed simply because one source lacked a column.
+The toolkit keeps the structure of each source file, so those cases can be handled separate for one other. Values are not copied across unrelated files, and rows are not removed simply because one source lacked a column.
 
 For genuine missing values, the app suggests conservative options. For example, when the data confirms a relationship such as:
 
@@ -129,7 +129,7 @@ Imagine two regional offices sending weekly sales spreadsheets.
 
 One file contains `customer_city`, while the other contains `discount_code`. Both files also include a few duplicates and missing values.
 
-The toolkit combines the files without dropping either column, guides the user through the cleaning decisions, and produces a final dataset that can be reviewed or shared.
+The toolkit combines the files without dropping either column, guides the user through the cleaning decisions and produces a final dataset that can be reviewed and shared.
 
 ## Output Files
 
@@ -142,7 +142,7 @@ The Excel export contains four sheets:
 - `Values to Review`
 - `Cleaning Audit`
 
-The audit includes the original value or state, the action taken, the method used, the source file, and the timestamp.
+The audit includes the original value or state, the action taken, the method used, the source file and the timestamp.
 
 ### CSV
 
@@ -165,12 +165,12 @@ Charts and a small data preview can be added optionally.
 
 | Module | What it handles |
 | --- | --- |
-| `app.py`, `workflow.py` | Streamlit interface, navigation, and session state |
-| `file_handler.py`, `data_processor.py` | File uploads, parsing, schema comparison, and combining |
-| `data_quality.py`, `integrity.py` | Missing-value handling, audit records, and relationship checks |
-| `analyzer.py`, `insights.py`, `visualizer.py` | Statistics, review flags, insights, and charts |
-| `exporter.py`, `report_generator.py` | Excel, CSV, audit, and Word report generation |
-| `ui_helpers.py`, `utils.py`, `logger_setup.py` | Shared helpers, formatting, and logging |
+| `app.py`, `workflow.py` | Streamlit interface, navigation and session state |
+| `file_handler.py`, `data_processor.py` | File uploads, parsing, schema comparison and combining |
+| `data_quality.py`, `integrity.py` | Missing-value handling, audit records and relationship checks |
+| `analyzer.py`, `insights.py`, `visualizer.py` | Statistics, review flags, insights and charts |
+| `exporter.py`, `report_generator.py` | Excel, CSV, audit and Word report generation |
+| `ui_helpers.py`, `utils.py`, `logger_setup.py` | Shared helpers, formatting and logging |
 
 ## Technology
 
